@@ -1,6 +1,6 @@
 {
   "name": "@fiyareuse/firebase-core",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Shared Firebase Admin initialization utilities for CoachAI apps",
   "type": "module",
   "main": "dist/index.js",
