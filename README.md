@@ -1,6 +1,6 @@
 # @fiyareuse/firebase-core
 
-Shared Firebase Admin initialization helpers for login.
+Shared Firebase Admin initialization helpers for CoachAI apps.
 
 ## Install
 

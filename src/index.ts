@@ -127,13 +127,19 @@ export interface InitializeFirebaseAdminOptions extends ServiceAccountLoaderOpti
 	credential?: AppOptions["credential"];
 }
 
+function resolveAdminNamespace() {
+	const resolved = (admin as unknown as {default?: typeof admin}).default ?? admin;
+	return resolved as typeof admin;
+}
+
 export function initializeFirebaseAdminApp(options: InitializeFirebaseAdminOptions = {}): App {
+	const resolvedAdmin = resolveAdminNamespace();
 	const logger = options.logger ?? defaultLogger;
 	const targetAppName = options.appName ?? "[DEFAULT]";
-	 const existing = admin.apps.find((appInstance) => appInstance?.name === targetAppName);
-	 if (existing) {
-	  return existing;
-	 }
+	const existing = resolvedAdmin.apps.find((appInstance) => appInstance?.name === targetAppName);
+	if (existing) {
+		return existing;
+	}
 
 	const serviceAccount = options.credential
 		? undefined
@@ -151,7 +157,7 @@ export function initializeFirebaseAdminApp(options: InitializeFirebaseAdminOptio
 	if (options.credential) {
 		appOptions.credential = options.credential;
 	} else if (serviceAccount) {
-		appOptions.credential = admin.credential.cert(serviceAccount);
+		appOptions.credential = resolvedAdmin.credential.cert(serviceAccount);
 		if (serviceAccount.projectId && !appOptions.projectId) {
 			appOptions.projectId = serviceAccount.projectId;
 		}
@@ -159,19 +165,20 @@ export function initializeFirebaseAdminApp(options: InitializeFirebaseAdminOptio
 		logger.warn("Initializing Firebase Admin app without explicit service account; relying on default credentials");
 	}
 
-	return admin.initializeApp(appOptions, targetAppName);
+	return resolvedAdmin.initializeApp(appOptions, targetAppName);
 }
 
 export function getFirestore(app?: App) {
+	const resolvedAdmin = resolveAdminNamespace();
 	if (app) {
-		return admin.firestore(app);
+		return resolvedAdmin.firestore(app);
 	}
 
-	if (admin.apps.length === 0) {
+	if (resolvedAdmin.apps.length === 0) {
 		throw new Error("Firebase Admin app has not been initialized. Call initializeFirebaseAdminApp first.");
 	}
 
-	return admin.firestore(admin.app());
+	return resolvedAdmin.firestore(resolvedAdmin.app());
 }
 
 export type {ServiceAccount};
